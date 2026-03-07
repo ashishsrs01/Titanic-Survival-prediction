@@ -64,3 +64,19 @@ sns.countplot(x='Sex', hue='Survived', data=titanic_data)
 plt.title('Survival by Sex')
 plt.legend(title='Survived', labels=['No', 'Yes'])
 plt.show()
+
+
+# Label encoding of Sex column
+from sklearn.preprocessing import LabelEncoder
+label_encoder = LabelEncoder()
+titanic_data['sex_encoded'] = label_encoder.fit_transform(titanic_data['Sex'])
+if 'sex_encoded' not in titanic_data.columns:
+    print('error: sex not encoded or founded')
+else:   print('sex column encoded successfully')
+
+# One-hot encoding of embarked column
+titanic_data = pd.get_dummies(titanic_data, columns=['Embarked'], drop_first=True)
+if 'Embarked_Q' not in titanic_data.columns or 'Embarked_S' not in titanic_data.columns:
+    print('error: Embarked column not one-hot encoded or founded')
+else:
+    print('Embarked column one-hot encoded successfully')
