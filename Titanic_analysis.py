@@ -80,3 +80,48 @@ if 'Embarked_Q' not in titanic_data.columns or 'Embarked_S' not in titanic_data.
     print('error: Embarked column not one-hot encoded or founded')
 else:
     print('Embarked column one-hot encoded successfully')
+
+
+
+# Define feature and Targets
+Features = ['Pclass', 'Age', 'sex_encoded', 'Embarked_Q', 'Embarked_S', 'SibSp', 'Parch', 'Fare']
+Target = 'Survived'
+
+# Split data for training and testing
+x = titanic_data[Features]
+y = titanic_data[Target]
+
+x_train, x_test, y_train, y_test = train_test_split(x,y, test_size=0.3, random_state = 42)
+
+# Train the logistic regrassion model
+model = LogisticRegression(max_iter=1000)
+model.fit(x_train, y_train)
+
+# Using trained model to predict the test set
+y_prediction = model.predict(x_test)
+
+# Comparing those predictions with the actual survival values
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_prediction))
+print("\nClassification Report:")
+print(classification_report(y_test, y_prediction))
+print("\nAccuracy Score:")
+print(accuracy_score(y_test, y_prediction))
+
+# Simple Performance Summary
+print("\n" + "="*50)
+print("MODEL PERFORMANCE SUMMARY")
+print("="*50)
+
+# Calculate accuracy
+accuracy = accuracy_score(y_test, y_prediction)
+print(f"\nAccuracy: {accuracy:.2%}")
+print("(This means the model got this percentage of predictions correct)")
+
+# Count correct and incorrect predictions
+correct = (y_test == y_prediction).sum()
+incorrect = (y_test != y_prediction).sum()
+print(f"\nCorrect Predictions: {correct}")
+print(f"Incorrect Predictions: {incorrect}")
+print(f"Total Test Cases: {len(y_test)}")
