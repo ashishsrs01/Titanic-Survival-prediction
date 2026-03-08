@@ -5,6 +5,7 @@ import numpy as np
 import sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 
 # Load the Dataset
 titanic_data = pd.read_csv("Data/train.csv")
@@ -183,3 +184,15 @@ print(f"\n✓ Correct Predictions: {correct}")
 print(f"❌ Incorrect Predictions: {incorrect}")
 print(f"📈 Total Test Cases: {len(y_test)}")
 print("\n" + "="*60)
+
+
+
+# Testing the prediction using random forest classifier
+rf_model = RandomForestClassifier( n_estimators=100, random_state=42)
+rf_model.fit(x_train, y_train)
+rf_pred = rf_model.predict(x_test)
+print("\n📊 Random Forest Classifier Performance:" )
+print("\n📋 Classification Report:")
+print(classification_report(y_test, rf_pred))
+accuracy_rf = accuracy_score(y_test, rf_pred)
+print(f"\n🎯 Random Forest Accuracy: {accuracy_rf:.2%}")
