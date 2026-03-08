@@ -196,3 +196,119 @@ print("\n📋 Classification Report:")
 print(classification_report(y_test, rf_pred))
 accuracy_rf = accuracy_score(y_test, rf_pred)
 print(f"\n🎯 Random Forest Accuracy: {accuracy_rf:.2%}")
+print("\n" + "="*60)
+
+# ============================================================================
+# TESTING THE MODEL ON THE ACTUAL TEST DATASET
+# ============================================================================
+
+print("\n" + "="*80)
+print("TESTING MODEL ON UNSEEN TEST DATA")
+print("="*80)
+
+# Load the test dataset
+print("\n📂 Loading test dataset...")
+test_data = pd.read_csv("Data/test.csv")
+
+if test_data.empty:
+    print("❌ Error: Test dataset is empty or not found.")
+else:
+    print("✓ Test dataset loaded successfully.")
+    print(f"   Test dataset contains {len(test_data)} passengers.")
+
+# Apply the same preprocessing steps as training data
+print("\n🔧 Applying preprocessing steps...")
+
+# Fill missing Age using the median Age from training data (same logic)
+test_data['Age'] = test_data['Age'].fillna(median_age.median())  # Use overall median as fallback
+print("✓ Age column: Missing values filled.")
+
+# Fill missing Embarked with the most common port (from training data)
+test_data['Embarked'] = test_data['Embarked'].fillna(mode_embarked)
+print("✓ Embarked column: Missing values filled.")
+
+# Fill missing Fare with median fare
+median_fare = test_data['Fare'].median()
+test_data['Fare'] = test_data['Fare'].fillna(median_fare)
+print("✓ Fare column: Missing values filled.")
+
+# Drop Cabin column
+test_data.drop('Cabin', axis=1, inplace=True)
+print("✓ Cabin column: Dropped.")
+
+# Apply the same encodings
+# Label encoding for Sex (using the same encoder from training)
+test_data['sex_encoded'] = label_encoder.transform(test_data['Sex'])
+print("✓ Sex column: Label encoding applied.")
+
+# One-hot encoding for Embarked
+test_data = pd.get_dummies(test_data, columns=['Embarked'], drop_first=True)
+print("✓ Embarked column: One-hot encoding applied.")
+
+# Ensure all required columns exist (add missing ones with 0 if needed)
+required_features = ['Pclass', 'Age', 'sex_encoded', 'Embarked_Q', 'Embarked_S', 'SibSp', 'Parch', 'Fare']
+for feature in required_features:
+    if feature not in test_data.columns:
+        test_data[feature] = 0
+        print(f"✓ Added missing feature: {feature}")
+
+# Select features for prediction
+X_test_final = test_data[required_features]
+
+print(f"\n📊 Test data prepared with {X_test_final.shape[0]} rows and {X_test_final.shape[1]} features.")
+
+# Make predictions using both models
+print("\n🤖 Making predictions...")
+
+# Logistic Regression predictions
+lr_predictions = model.predict(X_test_final)
+print("✓ Logistic Regression predictions completed.")
+
+# Random Forest predictions
+rf_predictions = rf_model.predict(X_test_final)
+print("✓ Random Forest predictions completed.")
+
+# Create submission DataFrames
+lr_submission = pd.DataFrame({
+    'PassengerId': test_data['PassengerId'],
+    'Survived': lr_predictions.astype(int)
+})
+
+rf_submission = pd.DataFrame({
+    'PassengerId': test_data['PassengerId'],
+    'Survived': rf_predictions.astype(int)
+})
+
+# Save predictions to CSV files
+lr_submission.to_csv('Data/logistic_regression_submission.csv', index=False)
+rf_submission.to_csv('Data/random_forest_submission.csv', index=False)
+
+print("\n💾 Predictions saved successfully!")
+print("   📄 Logistic Regression: Data/logistic_regression_submission.csv")
+print("   📄 Random Forest: Data/random_forest_submission.csv")
+
+# Display sample predictions
+print("\n📋 Sample predictions (first 10 passengers):")
+print("="*50)
+comparison_df = pd.DataFrame({
+    'PassengerId': test_data['PassengerId'][:10],
+    'Logistic_Regression': lr_predictions[:10],
+    'Random_Forest': rf_predictions[:10]
+})
+print(comparison_df.to_string(index=False))
+
+# Summary statistics
+print("\n📈 Prediction Summary:")
+print("="*50)
+print(f"Total predictions made: {len(lr_predictions)}")
+print(f"Logistic Regression - Survived: {lr_predictions.sum()} ({lr_predictions.sum()/len(lr_predictions)*100:.1f}%)")
+print(f"Random Forest - Survived: {rf_predictions.sum()} ({rf_predictions.sum()/len(rf_predictions)*100:.1f}%)")
+
+# Check agreement between models
+agreement = (lr_predictions == rf_predictions).sum()
+agreement_pct = agreement / len(lr_predictions) * 100
+print(f"Models agree on: {agreement} predictions ({agreement_pct:.1f}%)")
+
+print("\n" + "="*80)
+print("TESTING COMPLETE! Ready for Kaggle submission.")
+print("="*80)
