@@ -1,4 +1,6 @@
-# Titanic-Survival-prediction
+# Titanic Survival Prediction
+
+A supervised-learning practice project using the Kaggle Titanic dataset to explore passenger data and predict survival. This is an educational model, not a historical or causal explanation of individual outcomes.
 
 This project builds a machine learning model to predict passenger survival on the Titanic using the famous Kaggle Titanic dataset. The goal is to analyze historical passenger data and train a classification model that can estimate whether a passenger survived the disaster.
 
